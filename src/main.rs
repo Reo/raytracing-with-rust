@@ -6,8 +6,16 @@ use std::fs::File;
 mod vec;
 mod colour;
 mod ray;
+mod collision;
 
 fn ray_colour(r: ray::Ray) -> vec::RGBcol {
+    // check where ray intersects with sphere.
+    // Consider only positive values ie. those in front of the camera
+    let t = collision::hit_sphere(vec::Point3d::new(0.0, 0.0, -1.0), 0.5, r);
+    if t > 0.0 {
+        let N = vec::normalise(r.at(t) - vec::Vec3d::new(0.0, 0.0, -1.0));
+        return 0.5*vec::RGBcol::new(N.x() + 1.0, N.y() + 1.0, N.z() + 1.0);
+    }
     let unit_dir = vec::normalise(r.dir());
     let t = 0.5 * (unit_dir.y() + 1.0);
     (1.0 - t)*vec::RGBcol::new(1.0,1.0,1.0) + t*vec::RGBcol::new(0.5,0.7,1.0)
