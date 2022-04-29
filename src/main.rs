@@ -3,19 +3,32 @@ use std::io::Write;
 use std::io::BufWriter;
 use std::fs::File;
 
+use crate::hittable::Hittable;
+
 mod vec;
 mod colour;
 mod ray;
-mod collision;
+mod sphere;
+mod hittable;
 
 fn ray_colour(r: ray::Ray) -> vec::RGBcol {
     // check where ray intersects with sphere.
     // Consider only positive values ie. those in front of the camera
-    let t = collision::hit_sphere(vec::Point3d::new(0.0, 0.0, -1.0), 0.5, r);
-    if t > 0.0 {
-        let N = vec::normalise(r.at(t) - vec::Vec3d::new(0.0, 0.0, -1.0));
-        return 0.5*vec::RGBcol::new(N.x() + 1.0, N.y() + 1.0, N.z() + 1.0);
+
+    // here's a sphere intersection for example:
+    let sphere_centre = vec::Point3d::new(0.0, 0.0, -1.0);
+    let my_sphere = sphere::Sphere::new(sphere_centre, 0.5);
+    // intersections
+    let mut hitlist = hittable::HitList { p: vec::Point3d::zero(), n: vec::Vec3d::zero(), t: 0.0 };
+    let t_min = 0.000001;
+    let t_max = 1000000.0;
+    let hit_an_object = my_sphere.hit(&r, t_min, t_max, &mut hitlist);
+
+    if hit_an_object {
+        return 0.5*vec::RGBcol::new(hitlist.n.x() + 1.0, hitlist.n.y() + 1.0, hitlist.n.z() + 1.0);
     }
+
+    // otherwise, return a background colour/gradient
     let unit_dir = vec::normalise(r.dir());
     let t = 0.5 * (unit_dir.y() + 1.0);
     (1.0 - t)*vec::RGBcol::new(1.0,1.0,1.0) + t*vec::RGBcol::new(0.5,0.7,1.0)
