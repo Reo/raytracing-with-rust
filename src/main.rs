@@ -19,13 +19,13 @@ fn ray_colour(r: ray::Ray) -> vec::RGBcol {
     let sphere_centre = vec::Point3d::new(0.0, 0.0, -1.0);
     let my_sphere = sphere::Sphere::new(sphere_centre, 0.5);
     // intersections
-    let mut hitlist = hittable::HitNode { p: vec::Point3d::zero(), n: vec::Vec3d::zero(), t: 0.0, is_front: true };
+    let mut hitnode = hittable::HitNode { p: vec::Point3d::zero(), n: vec::Vec3d::zero(), t: 0.0, is_front: true };
     let t_min = 0.000001;
     let t_max = 1000000.0;
-    let hit_an_object = my_sphere.hit(&r, t_min, t_max, &mut hitlist);
+    let hit_an_object = my_sphere.hit(&r, t_min, t_max, &mut hitnode);
 
     if hit_an_object {
-        return 0.5*vec::RGBcol::new(hitlist.n.x() + 1.0, hitlist.n.y() + 1.0, hitlist.n.z() + 1.0);
+        return 0.5*vec::RGBcol::new(hitnode.n.x() + 1.0, hitnode.n.y() + 1.0, hitnode.n.z() + 1.0);
     }
 
     // otherwise, return a background colour/gradient

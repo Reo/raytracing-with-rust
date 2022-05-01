@@ -13,7 +13,7 @@ impl Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hitlist: &mut HitNode) -> bool {
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hitnode: &mut HitNode) -> bool {
         let displacement = ray.origin() - self.centre;
         let a = dot(ray.dir(), ray.dir());
         let half_b = dot(displacement, ray.dir());
@@ -39,10 +39,10 @@ impl Hittable for Sphere {
             }
         }
 
-        hitlist.t = root;                              // add intersection ray param to the hitlist
-        hitlist.p = ray.at(root);                          // add intersection point to the hitlist
-        let outward_normal = (hitlist.p - self.centre) / self.radius; // compute normal at intersection
-        hitlist.set_face_normal(ray, outward_normal);
+        hitnode.t = root;                              // add intersection ray param to the hitnode
+        hitnode.p = ray.at(root);                          // add intersection point to the hitnode
+        let outward_normal = (hitnode.p - self.centre) / self.radius; // compute normal at intersection
+        hitnode.set_face_normal(ray, outward_normal);
 
         return true;
     }

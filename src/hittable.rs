@@ -16,6 +16,6 @@ impl HitNode {
 }
 
 pub trait Hittable {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hitlist: &mut HitNode) -> bool;
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hitnode: &mut HitNode) -> bool;
 }
 
