@@ -1,6 +1,8 @@
 use crate::ray::*;
 use crate::vec::*;
 
+// node containing intersection information
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct HitNode {
     pub p: Point3d,      // 3d point where intersection occurs
     pub n: Vec3d,        // normal at point of intersection

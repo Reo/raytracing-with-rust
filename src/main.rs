@@ -5,6 +5,7 @@ use std::fs::File;
 
 use crate::hittable::Hittable;
 
+mod camera;
 mod colour;
 mod hitlist;
 mod hittable;
@@ -13,27 +14,22 @@ mod sphere;
 mod utility;
 mod vec;
 
-fn ray_colour(r: ray::Ray) -> vec::RGBcol {
+fn ray_colour(r: ray::Ray, world: &Vec<&dyn Hittable>) -> vec::RGBcol {
     // check where ray intersects with sphere.
     // Consider only positive values ie. those in front of the camera
 
-    // here's a sphere intersection for example:
-    let sphere_centre = vec::Point3d::new(0.0, 0.0, -1.0);
-    let my_sphere = sphere::Sphere::new(sphere_centre, 0.5);
     // intersections
+    // initialise the hitnode to a zero value
     let mut hitnode = hittable::HitNode { p: vec::Point3d::zero(), n: vec::Vec3d::zero(), t: 0.0, is_front: true };
-    let t_min = 0.000001;
-    let t_max = 1000000.0;
-    let hit_an_object = my_sphere.hit(&r, t_min, t_max, &mut hitnode);
+    let hit_an_object = world.hit(&r, utility::EPS, utility::INFTY, &mut hitnode);
 
     if hit_an_object {
-        return 0.5*vec::RGBcol::new(hitnode.n.x() + 1.0, hitnode.n.y() + 1.0, hitnode.n.z() + 1.0);
+        return 0.5 * (hitnode.n + vec::RGBcol::new(1.0,1.0,1.0));
     }
 
     // otherwise, return a background colour/gradient
-    let unit_dir = vec::normalise(r.dir());
-    let t = 0.5 * (unit_dir.y() + 1.0);
-    (1.0 - t)*vec::RGBcol::new(1.0,1.0,1.0) + t*vec::RGBcol::new(0.5,0.7,1.0)
+    let t = 0.5 * (vec::normalise(r.dir()).y() + 1.0);
+    return (1.0 - t)*vec::RGBcol::new(1.0,1.0,1.0) + t*vec::RGBcol::new(0.5,0.7,1.0);
 }
 
 fn main() {
@@ -42,16 +38,25 @@ fn main() {
     let img_width = 400;
     let img_height = (img_width as f64 / aspect_ratio) as i32;
     let filename = "out.ppm";
+    let samples_per_pixel = 100;
 
-    // camera
-    let viewport_height = 2.0;
-    let viewport_width = aspect_ratio * viewport_height;
-    let focal_length = 1.0;
+    // define the world
+    let mut world : Vec<&dyn Hittable> = vec![];
+    // **** objects in the world
+    let main_sphere : sphere::Sphere = sphere::Sphere {
+        centre: vec::Point3d::new(0.0, 0.0, -1.0),
+        radius: 0.5
+    };
+    let floor_sphere : sphere::Sphere = sphere::Sphere {
+        centre: vec::Point3d::new(0.0, -100.5, -1.0),
+        radius: 100.0
+    };
+    world.push(&main_sphere);
+    world.push(&floor_sphere);
 
-    let origin = vec::Point3d::zero();
-    let horizontal = vec::Vec3d::new(viewport_width, 0.0, 0.0);
-    let vertical = vec::Vec3d::new(0.0, viewport_height, 0.0);
-    let lower_left_corner = origin - horizontal/2.0 - vertical/2.0 - vec::Vec3d::new(0.0, 0.0, focal_length);
+    // define the camera(s)
+    let camera: camera::Camera = camera::Camera::new_default();
+
     // image handle
     let f = File::create(filename).expect("Unable to create file");
     let mut buf = BufWriter::new(f);
@@ -60,15 +65,21 @@ fn main() {
     // ppm header
     write!(buf, "P3\n{} {}\n255\n", img_width, img_height).expect("Problem writing header to ppm");
 
+    // rows
     for j in (0..img_height).rev() {
         eprint!("\rScanlines remaining: {} ", j);
         io::stderr().flush().unwrap();
+        // columns
         for i in 0..img_width {
-            let u = (i as f64) / (img_width - 1) as f64;
-            let v = (j as f64) / (img_height - 1) as f64;
-            let r = ray::Ray::new(origin, lower_left_corner + u*horizontal + v*vertical - origin);
-            let pixel_col = ray_colour(r);
-            colour::write_colour(&mut buf, pixel_col);
+            let mut pixel_col: vec::RGBcol = vec::RGBcol::zero();
+            for _k in 0..samples_per_pixel {
+                let u = (i as f64 + utility::unif_rng(0.0,1.0)) / (img_width - 1) as f64;
+                let v = (j as f64 + utility::unif_rng(0.0,1.0)) / (img_height - 1) as f64;
+                // get corresponding ray from camera to viewport
+                let r: ray::Ray = camera.get_ray(u, v);
+                pixel_col += ray_colour(r, &world);
+            }
+            colour::write_colour(&mut buf, pixel_col, samples_per_pixel);
         }
     }
     eprintln!("\nDone!\n");

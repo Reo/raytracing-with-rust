@@ -133,7 +133,6 @@ fn main() {
     let v = Vec3d { x: 9.0, y: 12.0, z: 20.0 };
     assert_eq!(v.len(), 25.0);
     // unit vector
-    // assert_eq!(v.normalise().len(), 1.0);
     // neg
     assert_eq!(Vec3d {x: -9.0, y: -12.0, z: -20.0}, -v);
     println!("{:?}", v);

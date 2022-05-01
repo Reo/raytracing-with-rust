@@ -2,16 +2,19 @@ use crate::vec::*;
 use crate::hittable::HitNode;
 use crate::hittable::Hittable;
 use crate::ray::Ray;
+use crate::utility::EPS;
 
 pub struct Sphere {
     pub centre: Point3d,
     pub radius: f64,
 }
 
+// constructor
 impl Sphere {
     pub fn new(c: Point3d, r: f64) -> Sphere { Sphere { centre: c, radius: r } }
 }
 
+// intersection function for a sphere
 impl Hittable for Sphere {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hitnode: &mut HitNode) -> bool {
         let displacement = ray.origin() - self.centre;
@@ -22,7 +25,7 @@ impl Hittable for Sphere {
         let discriminant = half_b*half_b - a*c;
 
         // make sure discriminant is non-negative and nontrivially greater than 0
-        if (discriminant - 16.0 * f64::EPSILON) < 0.0 {
+        if (discriminant - 16.0 * EPS) < 0.0 {
             return false
         }
         let sqrt_disc = discriminant.sqrt();
