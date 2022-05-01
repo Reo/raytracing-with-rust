@@ -19,7 +19,7 @@ fn ray_colour(r: ray::Ray) -> vec::RGBcol {
     let sphere_centre = vec::Point3d::new(0.0, 0.0, -1.0);
     let my_sphere = sphere::Sphere::new(sphere_centre, 0.5);
     // intersections
-    let mut hitlist = hittable::HitList { p: vec::Point3d::zero(), n: vec::Vec3d::zero(), t: 0.0 };
+    let mut hitlist = hittable::HitNode { p: vec::Point3d::zero(), n: vec::Vec3d::zero(), t: 0.0, is_front: true };
     let t_min = 0.000001;
     let t_max = 1000000.0;
     let hit_an_object = my_sphere.hit(&r, t_min, t_max, &mut hitlist);

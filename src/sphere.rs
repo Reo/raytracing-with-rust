@@ -1,5 +1,5 @@
 use crate::vec::*;
-use crate::hittable::HitList;
+use crate::hittable::HitNode;
 use crate::hittable::Hittable;
 use crate::ray::Ray;
 
@@ -13,7 +13,7 @@ impl Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hitlist: &mut HitList) -> bool {
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hitlist: &mut HitNode) -> bool {
         let displacement = ray.origin() - self.centre;
         let a = dot(ray.dir(), ray.dir());
         let half_b = dot(displacement, ray.dir());
@@ -39,9 +39,10 @@ impl Hittable for Sphere {
             }
         }
 
-        hitlist.t = root;                         // add intersection ray param to the hitlist
-        hitlist.p = ray.at(root);                     // add intersection point to the hitlist
-        hitlist.n = (hitlist.p - self.centre) / self.radius; // compute normal at intersection
+        hitlist.t = root;                              // add intersection ray param to the hitlist
+        hitlist.p = ray.at(root);                          // add intersection point to the hitlist
+        let outward_normal = (hitlist.p - self.centre) / self.radius; // compute normal at intersection
+        hitlist.set_face_normal(ray, outward_normal);
 
         return true;
     }
