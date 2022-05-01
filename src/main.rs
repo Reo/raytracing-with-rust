@@ -5,11 +5,13 @@ use std::fs::File;
 
 use crate::hittable::Hittable;
 
-mod vec;
 mod colour;
+mod hitlist;
+mod hittable;
 mod ray;
 mod sphere;
-mod hittable;
+mod utility;
+mod vec;
 
 fn ray_colour(r: ray::Ray) -> vec::RGBcol {
     // check where ray intersects with sphere.
