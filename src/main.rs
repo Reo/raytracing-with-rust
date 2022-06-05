@@ -14,7 +14,9 @@ mod sphere;
 mod utility;
 mod vec;
 
-fn ray_colour(r: ray::Ray, world: &Vec<&dyn Hittable>) -> vec::RGBcol {
+fn ray_colour(r: ray::Ray, world: &Vec<&dyn Hittable>, depth: i32) -> vec::RGBcol {
+    // break on max recursion depth
+    if depth == 0 { return vec::RGBcol::zero() }
     // check where ray intersects with sphere.
     // Consider only positive values ie. those in front of the camera
 
@@ -24,7 +26,13 @@ fn ray_colour(r: ray::Ray, world: &Vec<&dyn Hittable>) -> vec::RGBcol {
     let hit_an_object = world.hit(&r, utility::EPS, utility::INFTY, &mut hitnode);
 
     if hit_an_object {
-        return 0.5 * (hitnode.n + vec::RGBcol::new(1.0,1.0,1.0));
+        // TODO currently only doing diffuse objects so rays always bounce in random direction
+        // also, currently doing point + normal which assumes we're outside the object
+        // would be point - normal if we were inside
+        let next_dir: vec::Vec3d = hitnode.p + hitnode.n + vec::Vec3d::rand_unit();
+        return 0.5 * ray_colour(ray::Ray::new(hitnode.p, next_dir - hitnode.p), world, depth - 1);
+        // DEBUG
+        // colour normals: hitnode.n + vec::RGBcol::new(1.0,1.0,1.0)
     }
 
     // otherwise, return a background colour/gradient
@@ -39,6 +47,7 @@ fn main() {
     let img_height = (img_width as f64 / aspect_ratio) as i32;
     let filename = "out.ppm";
     let samples_per_pixel = 100;
+    let max_depth: i32 = 5;
 
     // define the world
     let mut world : Vec<&dyn Hittable> = vec![];
@@ -77,10 +86,11 @@ fn main() {
                 let v = (j as f64 + utility::unif_rng(0.0,1.0)) / (img_height - 1) as f64;
                 // get corresponding ray from camera to viewport
                 let r: ray::Ray = camera.get_ray(u, v);
-                pixel_col += ray_colour(r, &world);
+                pixel_col += ray_colour(r, &world, max_depth);
             }
             colour::write_colour(&mut buf, pixel_col, samples_per_pixel);
         }
     }
     eprintln!("\nDone!\n");
 }
+

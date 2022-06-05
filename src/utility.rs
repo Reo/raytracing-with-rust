@@ -1,7 +1,7 @@
 use rand::{thread_rng, Rng, ThreadRng};
 
 /* Useful consts */
-pub const EPS: f64 = 32.0 * f64::EPSILON;
+pub const EPS: f64 = 1024.0 * f64::EPSILON;
 pub const INFTY: f64 = f64::INFINITY;
 pub const PI: f64 = 3.141592653589793;
 

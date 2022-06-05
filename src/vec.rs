@@ -1,4 +1,5 @@
 use std::ops;
+use crate::utility::{unif_rng, PI};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Vec3d {
@@ -8,8 +9,17 @@ pub struct Vec3d {
 }
 
 impl Vec3d {
-    pub fn zero() -> Vec3d { Vec3d {x:0.0, y:0.0, z:0.0} }
-    pub fn new(x: f64, y: f64, z: f64) -> Vec3d { Vec3d {x:x, y:y, z:z} }
+    pub fn zero() -> Self { Vec3d {x:0.0, y:0.0, z:0.0} }
+    pub fn rand_unit() -> Self {
+        let u = unif_rng(-1.0, 1.0);
+        let theta = unif_rng(0.0, 2.0*PI);
+        Vec3d {
+            x: (1.0 - u*u).sqrt() * theta.cos(),
+            y: (1.0 - u*u).sqrt() * theta.sin(),
+            z: u
+        }
+    }
+    pub fn new(x: f64, y: f64, z: f64) -> Self { Vec3d {x:x, y:y, z:z} }
     pub fn len(self) -> f64 { (self.x * self.x + self.y * self.y + self.z * self.z).sqrt() }
 
     pub fn x(self) -> f64 { self.x }
