@@ -1,13 +1,15 @@
 use crate::ray::*;
 use crate::vec::*;
+use crate::material::*;
 
 // node containing intersection information
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct HitNode {
-    pub p: Point3d,      // 3d point where intersection occurs
-    pub n: Vec3d,        // normal at point of intersection
-    pub t: f64,          // ray parameter at point of intersection
-    pub is_front: bool,  // for determining whether ray is inside object
+    pub p: Point3d,         // 3d point where intersection occurs
+    pub n: Vec3d,           // normal at point of intersection
+    pub t: f64,             // ray parameter at point of intersection
+    pub is_front: bool,     // for determining whether ray is inside object
+    pub material: Material, // material used for determining object's appearance
 }
 
 impl HitNode {

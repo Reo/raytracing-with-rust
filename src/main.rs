@@ -9,6 +9,7 @@ mod camera;
 mod colour;
 mod hitlist;
 mod hittable;
+mod material;
 mod ray;
 mod sphere;
 mod utility;
@@ -22,7 +23,13 @@ fn ray_colour(r: ray::Ray, world: &Vec<&dyn Hittable>, depth: i32) -> vec::RGBco
 
     // intersections
     // initialise the hitnode to a zero value
-    let mut hitnode = hittable::HitNode { p: vec::Point3d::zero(), n: vec::Vec3d::zero(), t: 0.0, is_front: true };
+    let mut hitnode = hittable::HitNode {
+        p: vec::Point3d::zero(),
+        n: vec::Vec3d::zero(),
+        t: -1.0,
+        is_front: true,
+        material: material::Material::create_empty()
+    };
     let hit_an_object = world.hit(&r, utility::EPS, utility::INFTY, &mut hitnode);
 
     if hit_an_object {

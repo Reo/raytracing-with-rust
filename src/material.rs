@@ -1,7 +1,14 @@
-use crate::vec::RGBcol;
+use crate::vec::*;
 
 // currently only diffuse materials with base colour base_col
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Material {
-    base_col: RGBcol;
+    pub base_col: RGBcol,
 }
+
+impl Material {
+    pub fn create_empty() -> Self { Material {
+        base_col: Vec3d::zero()
+    } }
+}
+

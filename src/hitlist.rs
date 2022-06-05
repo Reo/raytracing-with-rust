@@ -3,6 +3,7 @@ use crate::hittable::HitNode;
 use crate::ray::Ray;
 use crate::vec::Vec3d;
 use crate::vec::Point3d;
+use crate::material::*;
 
 // implementing external traits on external types
 // https://doc.rust-lang.org/stable/book/ch19-03-advanced-traits.html
@@ -20,7 +21,8 @@ impl Hittable for Vec<&dyn Hittable> {
             p: Point3d::zero(),
             n: Vec3d::zero(),
             t: -1.0,
-            is_front: false
+            is_front: false,
+            material: Material::create_empty()
         };
 
         // for each hit candidate in the list, check for intersection
