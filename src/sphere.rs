@@ -3,15 +3,12 @@ use crate::hittable::HitNode;
 use crate::hittable::Hittable;
 use crate::ray::Ray;
 use crate::utility::EPS;
+use crate::material::*;
 
 pub struct Sphere {
     pub centre: Point3d,
     pub radius: f64,
-}
-
-// constructor
-impl Sphere {
-    pub fn new(c: Point3d, r: f64) -> Sphere { Sphere { centre: c, radius: r } }
+    pub material: Material,
 }
 
 // intersection function for a sphere

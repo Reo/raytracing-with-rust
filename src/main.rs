@@ -2,6 +2,7 @@ use std::io;
 use std::io::Write;
 use std::io::BufWriter;
 use std::fs::File;
+use std::ptr;
 
 use crate::hittable::Hittable;
 
@@ -15,20 +16,28 @@ mod sphere;
 mod utility;
 mod vec;
 
+/*
+ * ray: ray of light being traced to determine colour
+ * world: array of hittable objects in the scene
+ * depth: current recursion depth
+ * - - -
+ * returns colour of the ray currently being traced
+ * - - -
+ * note we currently assume the ray starts on the exterior of all world objects
+ */
 fn ray_colour(r: ray::Ray, world: &Vec<&dyn Hittable>, depth: i32) -> vec::RGBcol {
     // break on max recursion depth
     if depth == 0 { return vec::RGBcol::zero() }
-    // check where ray intersects with sphere.
-    // Consider only positive values ie. those in front of the camera
 
-    // intersections
-    // initialise the hitnode to a zero value
+    // ## intersections
+    // ### initialise the hitnode to a zero value
     let mut hitnode = hittable::HitNode {
         p: vec::Point3d::zero(),
         n: vec::Vec3d::zero(),
         t: -1.0,
         is_front: true,
-        material: material::Material::create_empty()
+        material: ptr::null_mut(),
+        next_dir: ray::Ray::new(vec::Point3d::zero(), vec::Vec3d::zero())
     };
     let hit_an_object = world.hit(&r, utility::EPS, utility::INFTY, &mut hitnode);
 
@@ -38,6 +47,7 @@ fn ray_colour(r: ray::Ray, world: &Vec<&dyn Hittable>, depth: i32) -> vec::RGBco
         // would be point - normal if we were inside
         let next_dir: vec::Vec3d = hitnode.p + hitnode.n + vec::Vec3d::rand_unit();
         return 0.5 * ray_colour(ray::Ray::new(hitnode.p, next_dir - hitnode.p), world, depth - 1);
+        // ### use the object's material to figure out colour and next ray's direction
         // DEBUG
         // colour normals: hitnode.n + vec::RGBcol::new(1.0,1.0,1.0)
     }
@@ -61,11 +71,13 @@ fn main() {
     // **** objects in the world
     let main_sphere : sphere::Sphere = sphere::Sphere {
         centre: vec::Point3d::new(0.0, 0.0, -1.0),
-        radius: 0.5
+        radius: 0.5,
+        material: material::Material { base_col: vec::RGBcol::new(1.0,1.0,1.0) }
     };
     let floor_sphere : sphere::Sphere = sphere::Sphere {
         centre: vec::Point3d::new(0.0, -100.5, -1.0),
-        radius: 100.0
+        radius: 100.0,
+        material: material::Material { base_col: vec::RGBcol::new(1.0,1.0,1.0) }
     };
     world.push(&main_sphere);
     world.push(&floor_sphere);
